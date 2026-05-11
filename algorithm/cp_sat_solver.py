@@ -14,6 +14,8 @@ class CPSATScheduler:
     - makespan is returned as int (was float from ObjectiveValue(), causing type
       inconsistencies when comparing against other algorithms' int makespans).
     - A 'status' field is now returned: OPTIMAL, FEASIBLE (time-limited), or NO_SOLUTION.
+      Previously all results looked identical regardless of whether the solver hit the
+      time limit — misleading when comparing against heuristics.
     - Returns makespan = None and empty schedule on NO_SOLUTION instead of silently
       returning ObjectiveValue() on a failed solve (which raises internally in OR-Tools).
     """

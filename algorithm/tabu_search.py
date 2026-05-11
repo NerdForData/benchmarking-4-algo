@@ -13,6 +13,15 @@ from benchmark.metrics import calculate_makespan
 
 
 class TabuSearch:
+    """
+    Tabu Search for Job Shop Scheduling.
+
+    - Tabu list is a set of hashable solution keys → O(1) lookup instead of O(n*m)
+    - A deque enforces the tenure window without repeated list.pop(0) (which was O(n))
+    - Neighbors are evaluated once and results cached before the admissibility check,
+      eliminating the double self.evaluate() call per candidate in the original
+    - Aspiration criterion: a tabu move is accepted if it beats the global best
+    """
 
     def __init__(self, instance, iterations=200, tabu_tenure=15):
         self.instance = instance

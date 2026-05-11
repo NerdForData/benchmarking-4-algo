@@ -11,7 +11,6 @@ from benchmark.metrics import Timer
 class Evaluator:
     """
     Wraps any algorithm and measures its wall-clock runtime.
-
     - It passes the 'status' field from the algorithm result through to the caller.
       This is essential for CP-SAT, which distinguishes OPTIMAL vs FEASIBLE (time-limited)
       vs NO_SOLUTION. Without it, all CP-SAT results looked identical in the CSV regardless

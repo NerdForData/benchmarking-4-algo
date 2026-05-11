@@ -12,6 +12,13 @@ from benchmark.metrics import calculate_makespan
 
 
 class GeneticAlgorithm:
+    """
+    Genetic Algorithm for Job Shop Scheduling.
+    - Crossover uses (job_id, operation_id) keys to avoid duplicate-tuple bugs
+    - Fitness is cached per generation (not recomputed on every comparison)
+    - Tournament selection replaces full-population sort (avoids O(n^2) fitness calls)
+    - Elite preservation keeps the best individual across generations
+    """
 
     def __init__(self, instance, population_size=50, generations=100, mutation_rate=0.1):
         self.instance = instance
