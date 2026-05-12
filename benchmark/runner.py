@@ -124,19 +124,54 @@ class BenchmarkRunner:
                 else:
                     gap = None
 
+                # ── Flow Time ─────────────────────────────────────────────
+                # Taillard assumes all jobs released at time 0, so:
+                #   flow_time_j = completion time of job j's last operation
+                #   avg_flow_time = mean across all jobs
+                schedule = result["schedule"]
+                if schedule:
+                    job_completion = {}
+                    for op in schedule:
+                        j = op["job"]
+                        job_completion[j] = max(job_completion.get(j, 0), op["end"])
+                    avg_flow_time = round(
+                        sum(job_completion.values()) / len(job_completion), 2
+                    )
+                else:
+                    avg_flow_time = None
+
+                # ── Machine Utilization ───────────────────────────────────
+                # utilization(m) = total active processing time on machine m
+                #                  / makespan × 100
+                # avg_machine_utilization = mean across all machines
+                if schedule and makespan and makespan > 0:
+                    machine_busy = {}
+                    for op in schedule:
+                        m = op["machine"]
+                        machine_busy[m] = machine_busy.get(m, 0) + op["duration"]
+                    avg_utilization = round(
+                        sum(machine_busy.values()) / (len(machine_busy) * makespan) * 100, 2
+                    )
+                else:
+                    avg_utilization = None
+
                 results.append({
-                    "instance":            file.name,
-                    "num_jobs":            num_jobs,
-                    "num_machines":        num_machines,
-                    "algorithm":           result["algorithm"],
-                    "makespan":            makespan,
-                    "bks":                 bks,
-                    "optimality_gap_pct":  gap,
-                    "runtime_s":           result["runtime"],
-                    "status":              result["status"],
+                    "instance":                    file.name,
+                    "num_jobs":                    num_jobs,
+                    "num_machines":                num_machines,
+                    "algorithm":                   result["algorithm"],
+                    "makespan":                    makespan,
+                    "bks":                         bks,
+                    "optimality_gap_pct":          gap,
+                    "avg_flow_time":               avg_flow_time,
+                    "avg_machine_utilization_pct": avg_utilization,
+                    "runtime_s":                   result["runtime"],
+                    "status":                      result["status"],
                 })
 
-                print(f"makespan={makespan}  gap={gap}%  [{result['status']}]  {result['runtime']}s")
+                print(f"makespan={makespan}  gap={gap}%  "
+                      f"flow={avg_flow_time}  util={avg_utilization}%  "
+                      f"[{result['status']}]  {result['runtime']}s")
 
         df = pd.DataFrame(results)
 
@@ -144,6 +179,7 @@ class BenchmarkRunner:
         df = df[[
             "instance", "num_jobs", "num_machines",
             "algorithm", "makespan", "bks", "optimality_gap_pct",
+            "avg_flow_time", "avg_machine_utilization_pct",
             "runtime_s", "status"
         ]]
 
